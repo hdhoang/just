@@ -24,6 +24,36 @@ test! {
   status: EXIT_FAILURE,
 }
 
+test! {
+  name: subcommand_not_found,
+  justfile: "x:
+  not-a-command arg",
+  stderr_regex: "not-a-command arg\n.*not (found|find subcommand)\nerror: Recipe.*line 2.*\n",
+  status: 127,
+}
+
+test! {
+  name: backtick_not_found,
+  justfile: "x := `not-a-command arg`",
+  stderr_regex: ".*not (found|find subcommand:)
+error: Backtick failed.*
+  |
+1 | x := `not-a-command arg`
+  |      ^^^^^^^^^^^^^^^^^^^
+  ",
+  status: 127,
+}
+
+test! {
+  name: shell_not_found,
+  justfile: "set shell := ['not-bash', '-c']
+x:
+  echo XYZ",
+  stderr_regex: "echo XYZ\nerror: Recipe.*not find subcommand:.*\n",
+  status: EXIT_FAILURE,
+  shell: false,
+}
+
 #[test]
 fn argument_count_mismatch() {
   Test::new()
